@@ -52,10 +52,11 @@ for ticker in tickers:
     try:
         df = yf.download(ticker, start=start_date, end=end_date)
 
-        if df.empty:
-            st.warning(f"未能获取 {ticker} 的数据。")
+        # 判断数据是否为空 + 是否包含所需列
+        if df.empty or not {"Close", "Volume"}.issubset(df.columns):
+            st.warning(f"⚠️ 无法获取 {ticker} 的有效股票数据，或缺少 Close/Volume 列。")
             continue
-
+        
         df.index = pd.to_datetime(df.index)
         df = df[["Close", "Volume"]]
         df_resampled = df.resample(freq).agg({"Close": "last", "Volume": "sum"})
